@@ -1,234 +1,172 @@
-DROP DATABASE IF EXISTS bank_demo;
-
-CREATE DATABASE bank_demo;
-
-USE bank_demo;
-
-DROP TABLE IF EXISTS district_demo;
-
-CREATE TABLE IF NOT EXISTS district_demo (
-district_id int UNIQUE,
-district_name varchar(50),
-region_name varchar(50),
-population int,
-average_salary float
+CREATE TABLE `actor` (
+  `actor_id` smallint PRIMARY KEY,
+  `first_name` varchar(45),
+  `last_name` varchar(45),
+  `last_update` timestamp
 );
 
-SELECT * FROM district_demo;
-
-INSERT INTO district_demo (district_id, district_name, region_name, population, average_salary) 
-VALUES
-(1,'Hl.m. Praha','Prague',123456,159);
-
-SELECT * FROM district_demo;
-
--- multiple rows, type interpretation, appends, does not override
-INSERT INTO district_demo(district_id, district_name, region_name, population, average_salary) 
-VALUES
-(2,'Benesov','central Bohemia',87756.33,'234'),
-(3,'Beroun','central Bohemia',84623,149);
-
-SELECT * FROM district_demo;
-
--- atomicity of statement, irreconcilable type interpretations
-INSERT INTO district_demo(district_id, district_name, region_name, population, average_salary)
-VALUES
-(4,'Kladno','central Bohemia',2000,130),
-(5,'Hl.p. Praha','Prague','over nine million',251);
-
-SELECT * FROM district_demo;
-
--- no constraints
-INSERT INTO district_demo(district_id, district_name, region_name, population, average_salary) 
-VALUES
-(1,'Hl.m. Praha','Prague',123456,159),
-(2,'Benesov','central Bohemia',87756,234),
-(3,'Beroun','central Bohemia',84623,149),
-(4,'Kladno','central Bohemia',20000,130);
-
-SELECT * FROM district_demo;
-
-DROP TABLE IF EXISTS district_demo;
-
--- contraints on content
-CREATE TABLE IF NOT EXISTS district_demo (
-district_id SERIAL,
-district_name varchar(50) UNIQUE NOT NULL,
-region_name varchar(50) DEFAULT NULL,
-population int DEFAULT 0,
-average_salary float DEFAULT NULL
+CREATE TABLE `country` (
+  `country_id` smallint PRIMARY KEY,
+  `country` varchar(50),
+  `last_update` timestamp
 );
 
-SELECT * FROM district_demo;
-
-INSERT INTO district_demo(district_name, region_name, population, average_salary) 
-VALUES
-('Hl.m. Praha','Prague',123456,159),
-('Benesov','central Bohemia',87756,234);
-
-SELECT * FROM district_demo;
-
--- protected from duplicates
-INSERT INTO district_demo(district_name, region_name, population, average_salary) 
-VALUES
-('Benesov','central Bohemia',87756,234),
-('Beroun','central Bohemia',84623,149),
-('Kladno','central Bohemia',20000,130);
-
--- default values. Notice SERIAL "issue"
-INSERT INTO district_demo(district_name, region_name, average_salary) 
-VALUES
-('Beroun','central Bohemia',149),
-('Kladno','central Bohemia',130);
-
-SELECT * FROM district_demo;
-
--- another table and constraints..
-
-DROP TABLE IF EXISTS account_demo;
-
-CREATE TABLE account_demo (
-  account_id SERIAL,
-  district_id int DEFAULT NULL,
-  frequency text,
-  date int DEFAULT NULL
-) ;
-
-INSERT INTO account_demo(district_id,frequency,date) 
-VALUES
-(4,'POPLATEK MESICNE',950324),
-(1,'POPLATEK MESICNE',930226),
-(5,'POPLATEK MESICNE',970707);
-
-SELECT * FROM account_demo;
-
-SELECT * FROM district_demo;
-
-SELECT * FROM district_demo as d
-JOIN account_demo as a
-on d.district_id = a.district_id;
-
--- what is the issue? REFERENTIAL INTEGRITY
-DROP TABLE IF EXISTS district_demo;
-
--- contraints on content
-CREATE TABLE IF NOT EXISTS district_demo (
-district_id SERIAL PRIMARY KEY,
-district_name varchar(50) UNIQUE NOT NULL,
-region_name varchar(50) DEFAULT NULL,
-population int DEFAULT 0,
-average_salary float DEFAULT NULL
+CREATE TABLE `film_category` (
+  `film_id` smallint PRIMARY KEY,
+  `category_id` tinyint,
+  `last_update` timestamp
 );
 
-INSERT INTO district_demo(district_name, region_name, population, average_salary) 
-VALUES
-('Hl.m. Praha','Prague',123456,159),
-('Benesov','central Bohemia',87756,234),
-('Beroun','central Bohemia',84623,149),
-('Kladno','central Bohemia',20000,130);
-
-SELECT * FROM district_demo;
-
-DROP TABLE IF EXISTS account_demo;
-
-CREATE TABLE account_demo (
-  account_id SERIAL PRIMARY KEY,
-  district_id bigint unsigned NOT NULL,
-  frequency text,
-  date int DEFAULT NULL,
-  CONSTRAINT FOREIGN KEY (district_id) REFERENCES district_demo(district_id)
+CREATE TABLE `category` (
+  `category_id` tinyint PRIMARY KEY,
+  `name` varchar(25),
+  `last_update` timestamp
 );
 
-SELECT * FROM district_demo;
+CREATE TABLE `film_text` (
+  `film_id` smallint PRIMARY KEY,
+  `title` varchar(255),
+  `description` text
+);
 
-INSERT INTO account_demo(district_id,frequency,date) 
-VALUES
-(4,'POPLATEK MESICNE',950324),
-(1,'POPLATEK MESICNE',930226),
-(5,'POPLATEK MESICNE',970707);
+CREATE TABLE `film_actor` (
+  `film_id` smallint,
+  `actor_id` smallint,
+  `last_update` timestamp,
+  PRIMARY KEY (`film_id`, `actor_id`)
+);
 
-INSERT INTO account_demo(district_id,frequency,date) 
-VALUES
-(4,'POPLATEK MESICNE',950324),
-(1,'POPLATEK MESICNE',930226),
-(4,'POPLATEK MESICNE',970707);
+CREATE TABLE `language` (
+  `language_id` pk,
+  `name` varchar(20),
+  `last_update` timestamp
+);
 
-SELECT * FROM account_demo;
+CREATE TABLE `film` (
+  `film_id` smallint PRIMARY KEY,
+  `title` varchar(128),
+  `description` text,
+  `release_year` year,
+  `language_id` pk,
+  `original_language_id` tinyint,
+  `rental_duration` tinyint,
+  `rental_rate` decimal(4,2),
+  `length` smallint,
+  `replacement_cost` decimal(5,2),
+  `rating` film_rating_enum,
+  `last_update` timestamp
+);
 
-SELECT *  FROM district_demo as d
-JOIN account_demo as a
-on d.district_id = a.district_id;
- 
- 
--- changing tables
-ALTER TABLE account_demo
-MODIFY date date;
+CREATE TABLE `address` (
+  `address_id` smallint PRIMARY KEY,
+  `address` varchar(50),
+  `address2` varchar(50),
+  `district` varchar(50),
+  `city_id` smallint,
+  `postal_code` varchar(10),
+  `phone` varchar(20),
+  `last_update` timestamp
+);
 
-SELECT * FROM account_demo;
+CREATE TABLE `inventory` (
+  `inventory_id` mediumint PRIMARY KEY,
+  `film_id` smallint,
+  `store_id` tinyint,
+  `last_update` timestamp
+);
 
-ALTER TABLE account_demo
-RENAME TO accountDemo;
+CREATE TABLE `city` (
+  `city_id` smallint PRIMARY KEY,
+  `city` varchar(50),
+  `country_id` smallint,
+  `last_update` timestamp
+);
 
-ALTER TABLE district_demo
-RENAME COLUMN district_id to dist_id;
+CREATE TABLE `store` (
+  `store_id` tinyint PRIMARY KEY,
+  `manager_staff_id` tinyint,
+  `address_id` smallint,
+  `last_update` timestamp
+);
 
-SELECT * FROM district_demo;
+CREATE TABLE `rental` (
+  `rental_id` int PRIMARY KEY,
+  `rental_date` duration,
+  `inventory_id` mediumint,
+  `customer_id` smallint,
+  `return_date` datetime,
+  `staff_id` tinyint,
+  `last_update` timestamp
+);
 
-INSERT INTO district_demo(district_name, region_name, population, average_salary) 
-VALUES
-('Hl.p. Praha','Prague',20000,130);
+CREATE TABLE `payment` (
+  `payment_id` smallint PRIMARY KEY,
+  `rental_id` int,
+  `staff_id` tinyint,
+  `customer_id` smallint,
+  `amount` decimal(5,2),
+  `payment_date` datetime,
+  `last_update` timestamp
+);
 
-ALTER TABLE accountDemo
-ADD COLUMN balance int AFTER date;
+CREATE TABLE `staff` (
+  `staff_id` tinyint PRIMARY KEY,
+  `first_name` varchar(45),
+  `last_name` varchar(45),
+  `address_id` smallint,
+  `picture` blob,
+  `email` varchar(50),
+  `store_id` tinyint,
+  `active` boolean,
+  `username` varchar(16),
+  `password` varchar(40),
+  `last_update` timestamp
+);
 
-SELECT * FROM accountDemo;
+CREATE TABLE `customer` (
+  `customer_id` smallint PRIMARY KEY,
+  `store_id` timestamp,
+  `first_name` varchar(45),
+  `last_name` varchar(45),
+  `email` datetime,
+  `address_id` smallint,
+  `active` boolean,
+  `create_date` datetime,
+  `last_update` timestamp
+);
 
--- watch out for defaults!
-ALTER TABLE accountDemo
-ADD COLUMN balance2 int NOT NULL AFTER balance;
+ALTER TABLE `category` ADD FOREIGN KEY (`category_id`) REFERENCES `film_category` (`category_id`);
 
-SELECT * FROM accountDemo;
+ALTER TABLE `film_text` ADD FOREIGN KEY (`film_id`) REFERENCES `film_actor` (`film_id`);
 
+ALTER TABLE `film` ADD FOREIGN KEY (`language_id`) REFERENCES `film_actor` (`film_id`);
 
--- DELETE AND DROP
+ALTER TABLE `film_category` ADD FOREIGN KEY (`film_id`) REFERENCES `film` (`film_id`);
 
-DELETE FROM accountDemo
-WHERE account_id=1;
+ALTER TABLE `language` ADD FOREIGN KEY (`language_id`) REFERENCES `film` (`language_id`);
 
-SELECT * FROM accountDemo;
+ALTER TABLE `actor` ADD FOREIGN KEY (`actor_id`) REFERENCES `film_actor` (`actor_id`);
 
-DELETE FROM accountDemo;
+ALTER TABLE `inventory` ADD FOREIGN KEY (`film_id`) REFERENCES `film` (`film_id`);
 
-SELECT * FROM accountDemo;
+ALTER TABLE `address` ADD FOREIGN KEY (`address_id`) REFERENCES `store` (`address_id`);
 
-DROP TABLE accountDemo;
+ALTER TABLE `payment` ADD FOREIGN KEY (`rental_id`) REFERENCES `rental` (`rental_id`);
 
-SELECT * FROM accountDemo;
+ALTER TABLE `payment` ADD FOREIGN KEY (`customer_id`) REFERENCES `rental` (`customer_id`);
 
--- UPDATE
+ALTER TABLE `payment` ADD FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`);
 
-SELECT * FROM district_demo;
+ALTER TABLE `rental` ADD FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`);
 
-UPDATE district_demo
-SET population = 0, average_salary = 0
-WHERE region_name = 'Prague';
+ALTER TABLE `store` ADD FOREIGN KEY (`store_id`) REFERENCES `staff` (`store_id`);
 
-SELECT * FROM district_demo;
+ALTER TABLE `rental` ADD FOREIGN KEY (`last_update`) REFERENCES `city` (`last_update`);
 
-UPDATE district_demo
-SET population = 1;
+ALTER TABLE `film` ADD FOREIGN KEY (`last_update`) REFERENCES `address` (`last_update`);
 
-SELECT * FROM district_demo;
+ALTER TABLE `customer` ADD FOREIGN KEY (`customer_id`) REFERENCES `rental` (`customer_id`);
 
-ALTER TABLE district_demo
-ADD location VARCHAR(30);
+ALTER TABLE `store` ADD FOREIGN KEY (`store_id`) REFERENCES `customer` (`store_id`);
 
-SELECT * FROM district_demo;
-
-UPDATE district_demo set location =
-  CASE
-  WHEN dist_id > 3 THEN 'north' 
-  ELSE 'south'
-  END;
-
-SELECT * FROM district_demo;
+ALTER TABLE `address` ADD FOREIGN KEY (`address_id`) REFERENCES `customer` (`address_id`);
